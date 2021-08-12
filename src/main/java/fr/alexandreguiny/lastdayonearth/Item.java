@@ -40,7 +40,7 @@ public class Item extends JPanel{
         imageIcon = new ImageIcon(newimg);
 
         item.setIcon(imageIcon);
-        this.add(item, BoxLayout.X_AXIS);
+
 
         JComboBox<Color> jCmbCouleur = new JComboBox<>();
         jCmbCouleur.addItem(Color.RED);
@@ -49,7 +49,10 @@ public class Item extends JPanel{
         jCmbCouleur.setRenderer(new ColorComboRenderer());
 
         jCmbCouleur.addActionListener(e -> this.setBackground((Color) jCmbCouleur.getSelectedItem()));
+
+        this.add(item);
         this.add(jCmbCouleur);
+
     }
 
 
