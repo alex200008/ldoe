@@ -2,6 +2,9 @@ package fr.alexandreguiny.lastdayonearth;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Arrays;
 
 public class Frame extends JFrame {
     public static void main(String[] args) {
@@ -10,24 +13,29 @@ public class Frame extends JFrame {
         var panel = new JPanel();
         panel.setLayout(new FlowLayout());
 
-        panel.add(new Item("Adhesive.png"));
-        panel.add(new Item("Animal_Rawhide.png"));
-        panel.add(new Item("Bandages.png.png"));
-        panel.add(new Item("Bolts.png"));
-        panel.add(new Item("Bottle_Of_Water.png"));
-        panel.add(new Item("CAC_Cards_Romeo.png"));
-        panel.add(new Item("Canned_Food.png"));
-        panel.add(new Item("Cigarettes.png"));
-        panel.add(new Item("Combat_Gear_Coupon.png"));
-        panel.add(new Item("Copper_Ore.png"));
-        panel.add(new Item("Fur.png"));
-        panel.add(new Item("Raw_Meat.png"));
-        panel.add(new Item("Raw_Turkey.png"));
-        panel.add(new Item("Rubber_Parts.png"));
-        panel.add(new Item("Scrap_Metal.png"));
-        panel.add(new Item("Seeds.png.png"));
-        panel.add(new Item("Spring.png"));
-        panel.add(new Item("Transistor.png"));
+        /*
+        panel.add(new Item("Images\\Adhesive.png"));
+        panel.add(new Item("Images\\Animal_Rawhide.png"));
+        panel.add(new Item("Images\\Bandages.png.png"));
+        panel.add(new Item("Images\\Bolts.png"));
+        panel.add(new Item("Images\\Bottle_Of_Water.png"));
+        panel.add(new Item("Images\\CAC_Cards_Romeo.png"));
+        panel.add(new Item("Images\\Canned_Food.png"));
+        panel.add(new Item("Images\\Cigarettes.png"));
+        panel.add(new Item("Images\\Combat_Gear_Coupon.png"));
+        panel.add(new Item("Images\\Copper_Ore.png"));
+        panel.add(new Item("Images\\Fur.png"));
+        panel.add(new Item("Images\\Raw_Meat.png"));
+        panel.add(new Item("Images\\Raw_Turkey.png"));
+        panel.add(new Item("Images\\Rubber_Parts.png"));
+        panel.add(new Item("Images\\Scrap_Metal.png"));
+        panel.add(new Item("Images\\Seeds.png.png"));
+        panel.add(new Item("Images\\Spring.png"));
+        panel.add(new Item("Images\\Transistor.png"));
+        */
+
+        Arrays.stream(new File("Images").listFiles()).forEach(file -> panel.add(new Item(file)));
+
 
 
         frame.add(panel);
