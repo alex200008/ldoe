@@ -1,4 +1,4 @@
-package fr.alexandreguiny.lastdayonearth;
+package fr.alexandreguiny.lastdayonearth.variable;
 
 import java.util.ArrayList;
 import java.util.List;
