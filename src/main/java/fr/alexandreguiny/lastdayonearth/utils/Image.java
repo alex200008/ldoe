@@ -5,8 +5,24 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 
-public class Image {
-    private static final HashMap<String, JLabel> images = new HashMap<>();
+public class Image extends JLabel {
+    public static final HashMap<String, JLabel> images = new HashMap<>();
+    private String name;
+
+    public Image(File file) {
+        try {
+            var imageIcon = new ImageIcon(file.toURI().toURL());
+            this.name = file.getName().replace(".png", "");
+            imageIcon.setImage(imageIcon.getImage().getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH));
+            this.setIcon(imageIcon);
+            var textFrame = new TextFrame(name);
+            this.addMouseListener(textFrame);
+            this.addMouseMotionListener(textFrame);
+            images.put(this.name, this);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void init() {
         init(new File("Images"));
@@ -14,15 +30,7 @@ public class Image {
 
     private static void init(File file) {
         if (file.isFile()) {
-            try {
-                var imageIcon = new ImageIcon(file.toURI().toURL());
-                imageIcon.setImage(imageIcon.getImage().getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH));
-                var label = new JLabel();
-                label.setIcon(imageIcon);
-                images.put(file.getName(), label);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+            new Image(file);
         } else if (file.isDirectory()) {
             //noinspection ConstantConditions
             for (var child : file.listFiles()) {
@@ -32,6 +40,9 @@ public class Image {
     }
 
     public static JLabel get(String name) {
-        return images.get(name);
+        var label = images.get(name);
+        if (label != null)
+            images.remove(name);
+        return label;
     }
 }

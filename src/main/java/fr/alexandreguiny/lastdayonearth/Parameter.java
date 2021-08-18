@@ -11,11 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static fr.alexandreguiny.lastdayonearth.variable.Category.*;
+import static fr.alexandreguiny.lastdayonearth.variable.Category.OTHER;
 
 public class Parameter {
     public final String name;
@@ -23,8 +21,14 @@ public class Parameter {
     private Set<Color> allColor = Set.of(Color.RED, Color.GREEN);
     private boolean natural = false;
     private Category category = OTHER;
-    private JLabel icon;
+    private final JLabel icon;
     public static ArrayList<Parameter> parameters = new ArrayList<>();
+
+    public Parameter(String name, JLabel icon) {
+        this.name = name.replace(".png", "");
+        this.icon = icon;
+        parameters.add(this);
+    }
 
     public static void init() {
         var str = "";
@@ -41,6 +45,7 @@ public class Parameter {
             new Parameter(line);
 
         }
+        Image.images.forEach(Parameter::new);
     }
 
     public Parameter(String line) {
@@ -48,7 +53,7 @@ public class Parameter {
         if (para.length < 1)
             throw new RuntimeException("Invalid argument :" + line);
 
-        this.name = para[0];
+        this.name = para[0].replace(".png", "");
         this.icon = Image.get(this.name);
         if (this.icon == null)
             throw new RuntimeException("Failed to find " + this.name);
@@ -64,7 +69,7 @@ public class Parameter {
     }
 
     public static Parameter find(String name) {
-        return parameters.stream().filter(parameter -> parameter.name.equals(name + ".png")).findFirst().orElse(null);
+        return parameters.stream().filter(parameter -> parameter.name.equals(name)).findFirst().orElse(null);
     }
 
     @Override
