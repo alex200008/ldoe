@@ -8,6 +8,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
+// TODO add scroll
 public abstract class  MyPanel <PANEL extends MiniPanel> extends JPanel {
     private JTabbedPane categories = new JTabbedPane();
     private ArrayList<Parameter> parameterList = new ArrayList<>();
@@ -47,8 +48,7 @@ public abstract class  MyPanel <PANEL extends MiniPanel> extends JPanel {
             for(var parameter : parameterList) {
                 panel.add(map(parameter));
             }
-        }
-        else {
+        } else {
             panel.removeAll();
             for(var parameter : parameterList) {
                 if (parameter.getCategory().equals(Category.of(title)))

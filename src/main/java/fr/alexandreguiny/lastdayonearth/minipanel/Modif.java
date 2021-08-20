@@ -2,15 +2,10 @@ package fr.alexandreguiny.lastdayonearth.minipanel;
 
 import fr.alexandreguiny.lastdayonearth.Parameter;
 import fr.alexandreguiny.lastdayonearth.variable.Category;
-import fr.alexandreguiny.lastdayonearth.variable.Color;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class Modif extends MiniPanel {
-    private final List<JCheckBox> colorBox = new ArrayList<>();
     private final JCheckBox naturalBox = new JCheckBox("natural");
     private final JComboBox<Category> comboCategories = new JComboBox<>();
 
@@ -30,17 +25,7 @@ public class Modif extends MiniPanel {
         var panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        { // allColor
-            for (var color : Color.class.getEnumConstants()) {
-                var box = new JCheckBox(color.name());
-                box.setBackground(color.color);
-                panel.add(box);
-                colorBox.add(box);
-                if (parameter.getAllColor().contains(color)) {
-                    box.setSelected(true);
-                }
-            }
-        } // allColor
+        panel.add(new JLabel(parameter.getIcon().getIcon()));
 
         { // naturalBox
             naturalBox.setSelected(parameter.isNatural());
@@ -72,7 +57,6 @@ public class Modif extends MiniPanel {
     }
 
     private void setModif(final Parameter parameter) {
-        parameter.setAllColor(colorBox.stream().filter(AbstractButton::isSelected).map(jCheckBox -> Color.of(jCheckBox.getText())).collect(Collectors.toSet()));
         parameter.setNatural(naturalBox.isSelected());
         parameter.setCategory((Category) comboCategories.getSelectedItem());
     }

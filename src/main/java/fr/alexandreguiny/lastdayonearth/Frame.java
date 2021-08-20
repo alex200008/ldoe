@@ -7,6 +7,12 @@ import fr.alexandreguiny.lastdayonearth.utils.Image;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
+import java.io.IOException;
+
+// TODO -optimiser la sauvegarde
+// TODO -metre un ordre de rangement
+// TODO add Timer
+
 
 public class Frame extends JFrame {
     private final MyPanel<Stat> craftItems = new MyPanel<>(Stat::new) {
@@ -33,18 +39,26 @@ public class Frame extends JFrame {
             return true;
         }
     };
+    private final MyPanel<Stat> recycler = new MyPanel<Stat>(Stat::new) {
+        @Override
+        protected boolean filter(Parameter item) {
+            return Recycler.filter(item);
+        }
+    };
 
-    public Frame(String title) throws HeadlessException {
+    public Frame(String title) throws HeadlessException, IOException {
         super(title);
         Image.init();
         Parameter.init();
         Craft.init();
+        Recycler.init();
 
 
         var menus = new JTabbedPane();
         menus.add("All", allItems);
         menus.add("Craft", craftItems);
         menus.add("Missing", missCraft);
+        menus.add("Recycler", recycler);
         menus.add("Modif", modif);
         menus.addChangeListener(this::menu);
         this.add(menus);
@@ -58,7 +72,7 @@ public class Frame extends JFrame {
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         new Frame("Last Day On Earth");
     }
 

@@ -60,7 +60,7 @@ public class Parameter {
             throw new RuntimeException("Failed to find " + this.name);
         if (para.length > 1)
             this.actualColor = Color.of(para[1]);
-        if (para.length > 2)
+        if (para.length > 2) // TODO delete me
             this.allColor = new HashSet<>(Color.listOf(para[2].split("\\.")));
         if (para.length > 3)
             natural = para[3].equals("T");
@@ -72,7 +72,10 @@ public class Parameter {
     }
 
     public static Parameter find(String name) {
-        return parameters.stream().filter(parameter -> parameter.name.equals(name)).findFirst().orElse(null);
+        var res =  parameters.stream().filter(parameter -> parameter.name.equals(name)).findFirst();
+        if (res.isEmpty())
+            System.err.println(name);
+        return res.orElse(null);
     }
 
     @Override
