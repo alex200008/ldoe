@@ -54,16 +54,12 @@ public class Craft {
     public boolean canCraft() {
         if (obj == null || !valid)
             return false;
-        return isMissing(obj) && !other.stream().map(Craft::isMissing).reduce((aBoolean, aBoolean2) -> aBoolean || aBoolean2).orElse(true);
+        return obj.isMissing() && !other.stream().map(Parameter::isEmpty).reduce((aBoolean, aBoolean2) -> aBoolean || aBoolean2).orElse(true);
     }
 
     public static boolean canCraft(Parameter parameter) {
         return Craft.crafts.stream()
                 .filter(craft -> craft.obj.equals(parameter))
                 .anyMatch(Craft::canCraft);
-    }
-
-    public static boolean isMissing(Parameter parameter) {
-        return parameter.getActualColor().equals(Color.RED);
     }
 }

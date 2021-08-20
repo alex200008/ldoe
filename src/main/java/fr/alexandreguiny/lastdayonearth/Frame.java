@@ -24,7 +24,7 @@ public class Frame extends JFrame {
     private final MyPanel<Stat> missCraft = new MyPanel<>(Stat::new) {
         @Override
         protected boolean filter(Parameter parameter) {
-            return parameter.isNatural() && Craft.isMissing(parameter);
+            return parameter.isNatural() && parameter.isMissing();
         }
     };
     private final MyPanel<Modif> modif = new MyPanel<>(Modif::new) {

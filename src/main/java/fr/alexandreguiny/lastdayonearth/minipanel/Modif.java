@@ -18,7 +18,7 @@ public class Modif extends MiniPanel {
     public MiniPanel init(Parameter parameter) {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        this.add(new JLabel(parameter.getIcon().getIcon()));
+        this.add(parameter.getIcon());
         var button = new JButton("Modif");
         button.addActionListener(e -> modif(parameter));
         this.add(button);

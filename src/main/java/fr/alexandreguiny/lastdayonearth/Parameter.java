@@ -14,11 +14,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static fr.alexandreguiny.lastdayonearth.variable.Category.OTHER;
+import static fr.alexandreguiny.lastdayonearth.variable.Color.*;
 
 public class Parameter {
     public final String name;
     private Color actualColor = Color.GRAY;
-    private Set<Color> allColor = Set.of(Color.RED, Color.GREEN);
+    private Set<Color> allColor = Set.of(RED, Color.GREEN);
     private boolean natural = false;
     private Category category = OTHER;
     private final JLabel icon;
@@ -63,8 +64,10 @@ public class Parameter {
             this.allColor = new HashSet<>(Color.listOf(para[2].split("\\.")));
         if (para.length > 3)
             natural = para[3].equals("T");
-        if (para.length > 4)
+        if (para.length > 4) {
             category = Category.of(para[4]);
+            allColor = Set.of(category.getColors());
+        }
         parameters.add(this);
     }
 
@@ -115,6 +118,7 @@ public class Parameter {
 
     public void setCategory(Category category) {
         this.category = category;
+        this.allColor = Set.of(category.getColors());
         save();
     }
 
@@ -139,4 +143,17 @@ public class Parameter {
             e.printStackTrace();
         }
     }
+
+
+    public boolean isMissing() {
+        return actualColor.equals(RED) || actualColor.equals(YELLOW);
+    }
+
+    public boolean isEmpty() {
+        return actualColor.equals(RED);
+    }
+
+
+
+
 }
