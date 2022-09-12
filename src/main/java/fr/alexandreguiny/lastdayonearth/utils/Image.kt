@@ -3,51 +3,49 @@ package fr.alexandreguiny.lastdayonearth.utils
 import java.io.File
 import java.net.MalformedURLException
 import javax.swing.ImageIcon
-import javax.swing.JLabel
 
-class Image(file: File) : JLabel() {
-    private val imageName: String
-
+class Image(file: File) : ImageIcon() {
     init {
         if (!file.name.matches("[A-Z0-9][A-Za-z'0-9-]*(_[A-Z0-9][A-Za-z'0-9-]*)*\\.png".toRegex())) {
             Error("Bad format:'" + file.name + "'")
         }
-        this.imageName = file.name.replace(".png", "")
+        val name = file.name.replace(".png", "")
         try {
-            val imageIcon = ImageIcon(file.toURI().toURL())
-            imageIcon.image = imageIcon.image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH)
-            this.icon = imageIcon
-            val textFrame = TextFrame(imageName)
-            addMouseListener(textFrame)
-            addMouseMotionListener(textFrame)
-            imageLabels[this.imageName] = this
-            images[imageName] = imageIcon
+
+            image = ImageIcon(file.toURI().toURL()).image
+            if (iconHeight != 100 || iconWidth != 100)
+                image = image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH)
+            images[name] = this
         } catch (e: MalformedURLException) {
             e.printStackTrace()
         }
     }
 
     companion object {
-        val imageLabels = HashMap<String, JLabel>()
-        val images = HashMap<String, ImageIcon>()
-        fun init() {
-            init(File("Images"))
-        }
+        private var alreadyInit = false
+        private val images: HashMap<String, ImageIcon> = HashMap()
+            get() {
+                if (!alreadyInit) {
+                    alreadyInit = true
+                    read(File("Images"))
+                }
+                return field
+            }
 
-        private fun init(file: File) {
+        private fun read(file: File) {
             if (file.isFile) {
                 Image(file)
             } else if (file.isDirectory) {
                 for (child in file.listFiles()!!) {
-                    init(child)
+                    read(child)
                 }
             }
         }
 
-        operator fun get(name: String): JLabel {
-            val label = imageLabels[name] ?: throw RuntimeException("Failed to find $name")
-            imageLabels.remove(name)
-            return label
+        operator fun get(name : String) : ImageIcon? {
+            val icon = images[name]
+            images.remove(name)
+            return icon
         }
     }
 }

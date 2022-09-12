@@ -2,7 +2,6 @@ package fr.alexandreguiny.lastdayonearth
 
 import fr.alexandreguiny.lastdayonearth.Craft.Companion.canCraft
 import fr.alexandreguiny.lastdayonearth.item.Parameter
-import fr.alexandreguiny.lastdayonearth.utils.Image
 import java.awt.Toolkit
 import java.io.IOException
 import javax.swing.JFrame
@@ -34,7 +33,6 @@ class Frame(title: String?) : JFrame(title) {
     }
 
     init {
-        Image.init()
         Parameter.init()
         Craft.init()
         Recycler.init()

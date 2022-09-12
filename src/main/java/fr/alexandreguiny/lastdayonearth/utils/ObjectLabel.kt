@@ -1,13 +1,12 @@
 package fr.alexandreguiny.lastdayonearth.utils
 
 import fr.alexandreguiny.lastdayonearth.item.Parameter
-import javax.swing.ImageIcon
 import javax.swing.JLabel
 
-class ObjectLabel(parameter: Parameter, imageIcon: ImageIcon? = Image.images[parameter.name]) : JLabel() {
+class ObjectLabel(parameter: Parameter) : JLabel() {
 
     init {
-        icon = imageIcon
+        icon = Image[parameter.name]
 
         alignmentX = CENTER_ALIGNMENT
 
