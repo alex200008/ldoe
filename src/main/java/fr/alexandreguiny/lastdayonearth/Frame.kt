@@ -2,7 +2,6 @@ package fr.alexandreguiny.lastdayonearth
 
 import fr.alexandreguiny.lastdayonearth.Craft.Companion.canCraft
 import fr.alexandreguiny.lastdayonearth.item.Parameter
-import fr.alexandreguiny.lastdayonearth.item.Stat
 import fr.alexandreguiny.lastdayonearth.utils.Image
 import java.awt.Toolkit
 import java.io.IOException
@@ -13,22 +12,22 @@ import javax.swing.event.ChangeEvent
 // TODO -optimiser la sauvegarde
 // TODO add Timer
 class Frame(title: String?) : JFrame(title) {
-    private val craftItems: MyPanel = object : MyPanel({parameter: Parameter -> Stat(parameter) }) {
-        override fun filter(parameter: Parameter): Boolean {
-            return canCraft(parameter)
+    private val craftItems: MyPanel = object : MyPanel() {
+        override fun filter(item: Parameter): Boolean {
+            return canCraft(item)
         }
     }
-    private val allItems: MyPanel = object : MyPanel({parameter: Parameter -> Stat(parameter) }) {
-        override fun filter(parameter: Parameter): Boolean {
+    private val allItems: MyPanel = object : MyPanel() {
+        override fun filter(item: Parameter): Boolean {
             return true
         }
     }
-    private val missCraft: MyPanel = object : MyPanel({parameter: Parameter -> Stat(parameter) }) {
-        override fun filter(parameter: Parameter): Boolean {
-            return parameter.isNatural && parameter.isMissing
+    private val missCraft: MyPanel = object : MyPanel() {
+        override fun filter(item: Parameter): Boolean {
+            return item.isNatural && item.isMissing
         }
     }
-    private val recycler: MyPanel = object : MyPanel({parameter: Parameter -> Stat(parameter) }) {
+    private val recycler: MyPanel = object : MyPanel() {
         override fun filter(item: Parameter): Boolean {
             return Recycler.filter(item)
         }

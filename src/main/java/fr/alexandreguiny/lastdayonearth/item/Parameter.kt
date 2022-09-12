@@ -14,7 +14,7 @@ import javax.swing.JLabel
 
 class Parameter: Comparable<Parameter> {
     val name: String
-    var iconLabel: JLabel
+    val iconLabel: JLabel
 
     var actualColor = Color.GRAY
         set(value) {
@@ -121,7 +121,7 @@ class Parameter: Comparable<Parameter> {
 
     companion object {
         @JvmField
-        var parameters = HashSet<Parameter?>()
+        var parameters = HashSet<Parameter>()
         val allLines = HashMap<String, String>()
         @JvmStatic
         fun init() {

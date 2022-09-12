@@ -1,67 +1,56 @@
-package fr.alexandreguiny.lastdayonearth;
+package fr.alexandreguiny.lastdayonearth
 
-import fr.alexandreguiny.lastdayonearth.item.Parameter;
-import fr.alexandreguiny.lastdayonearth.item.Stat;
-import fr.alexandreguiny.lastdayonearth.variable.Category;
-import kotlin.jvm.functions.Function1;
-import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.ArrayList;
+import fr.alexandreguiny.lastdayonearth.item.Parameter
+import fr.alexandreguiny.lastdayonearth.item.Stat
+import fr.alexandreguiny.lastdayonearth.item.Stat.Companion.stats
+import fr.alexandreguiny.lastdayonearth.variable.Category
+import java.awt.BorderLayout
+import java.awt.FlowLayout
+import java.util.TreeSet
+import javax.swing.JPanel
+import javax.swing.JTabbedPane
+import javax.swing.event.ChangeEvent
 
 // TODO add scroll
-public abstract class  MyPanel extends JPanel {
-    private final JTabbedPane categories = new JTabbedPane();
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-    private final ArrayList<Parameter> parameterList = new ArrayList<>();
-    private final JPanel all = new JPanel();
-    private final Function1<? super Parameter, Stat> constructor;
+abstract class MyPanel : JPanel() {
+    private val categories = JTabbedPane()
+    private val parameterList = TreeSet<Stat>()
+    private var filteredList : List<Stat> = parameterList.toList()
+    private val all = JPanel()
 
-    public MyPanel(@NotNull Function1<? super Parameter, Stat> constructor) {
-        this.constructor = constructor;
-        this.setLayout(new BorderLayout());
-        this.add(categories, BorderLayout.CENTER);
-        all.setLayout(new FlowLayout());
-        categories.add(all, "All");
-        categories.addChangeListener(e -> subUpdate());
-        for (var category : Category.class.getEnumConstants()) {
-            var panel = new JPanel();
-            panel.setLayout(new FlowLayout());
-            categories.add(panel, category.name());
+    init {
+        this.layout = BorderLayout()
+        this.add(categories, BorderLayout.CENTER)
+        all.layout = FlowLayout()
+        categories.add(all, "All")
+        categories.addChangeListener { e: ChangeEvent? -> subUpdate() }
+        for (category in Category::class.java.enumConstants) {
+            val panel = JPanel()
+            panel.layout = FlowLayout()
+            categories.add(panel, category.name)
         }
     }
 
-    public void update() {
-        parameterList.clear();
-        for (var parameter : Parameter.parameters) {
-            if (filter(parameter)) {
-                parameterList.add(parameter);
-                all.add(map(parameter));
-            }
-        }
-        subUpdate();
+    fun update() {
+        filteredList = stats.filter { stat -> filter(stat.parameter) }
+        filteredList.forEach { stat -> all.add(stat) }
+        subUpdate()
     }
 
-    public void subUpdate() {
-        var panel = (JPanel) categories.getSelectedComponent();
-        var title = categories.getTitleAt(categories.getSelectedIndex());
-        panel.removeAll();
-        if (title.equals("All")) {
-            for(var stat : Stat.Companion.getStats()) {
-                panel.add(stat);
+    fun subUpdate() {
+        val panel = categories.selectedComponent as JPanel
+        val title = categories.getTitleAt(categories.selectedIndex)
+        panel.removeAll()
+        if (title == "All") {
+            for (stat in stats) {
+                panel.add(stat)
             }
         } else {
-            for(var stat : Stat.Companion.getStats()) {
-                if (stat.getParameter().getCategory().equals(Category.of(title)))
-                    panel.add(stat);
+            for (stat in stats) {
+                if (stat.parameter.category == Category.of(title)) panel.add(stat)
             }
         }
     }
 
-    protected Stat map(Parameter parameter) {
-        return constructor.invoke(parameter);
-    }
-
-    protected abstract boolean filter(Parameter item);
+    protected abstract fun filter(item: Parameter): Boolean
 }

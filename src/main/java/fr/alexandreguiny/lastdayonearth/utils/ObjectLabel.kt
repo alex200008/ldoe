@@ -9,6 +9,8 @@ class ObjectLabel(parameter: Parameter, imageIcon: ImageIcon? = Image.images[par
     init {
         icon = imageIcon
 
+        alignmentX = CENTER_ALIGNMENT
+
         val textFrame = TextFrame(parameter)
 
         addMouseListener(textFrame)

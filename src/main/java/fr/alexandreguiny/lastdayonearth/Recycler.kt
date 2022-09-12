@@ -1,81 +1,73 @@
-package fr.alexandreguiny.lastdayonearth;
+package fr.alexandreguiny.lastdayonearth
 
-import fr.alexandreguiny.lastdayonearth.item.Parameter;
+import fr.alexandreguiny.lastdayonearth.item.Parameter
+import fr.alexandreguiny.lastdayonearth.item.Parameter.Companion.find
+import fr.alexandreguiny.lastdayonearth.variable.Color
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.util.*
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.*;
-
-import static fr.alexandreguiny.lastdayonearth.variable.Color.ORANGE;
-
-public class Recycler {
+class Recycler(line: String) {
     // FIXME unfinished
-    enum Type {
-        CLOTHES,
-        WEAPONS,
-        UNKNOWN;
+    enum class Type {
+        CLOTHES, WEAPONS, UNKNOWN;
 
-        static public Type of(String name) {
-            return switch (name) {
-                case "CLOTHES" -> CLOTHES;
-                case "WEAPONS" -> WEAPONS;
-                default -> UNKNOWN;
-            };
-        }
-    }
-
-    public static List<Recycler> recyclers = new ArrayList<>();
-
-    public final Type type;
-    public final Parameter obj;
-    public final Parameter[] objs;
-
-    public Recycler(String line) {
-        var para = line.split(",");
-        type = Type.of(para[0]);
-        obj = Parameter.find(para[1]);
-
-        final List<Parameter> objs = new ArrayList<>();
-        for (var strObj : para[2].split("\\.")) {
-            objs.add(Parameter.find(strObj));
-        }
-
-        this.objs = objs.toArray(Parameter[]::new);
-
-        var hash = new HashSet<>(Objects.requireNonNull(obj).getAllColor());
-        hash.add(ORANGE);
-        obj.setAllColor(hash);
-        recyclers.add(this);
-    }
-
-    public static void init() throws IOException {
-        var file = new File("Recycler.txt");
-
-        if (!file.exists()) {
-            if (!file.createNewFile())
-                System.err.println("Can't create new file 'Recycler.java'");
-            return;
-        }
-
-        for (var line : Files.readAllLines(file.toPath())) {
-            try {
-                new Recycler(line);
-            } catch (Exception ignored) {
-
+        companion object {
+            fun of(name: String?): Type {
+                return when (name) {
+                    "CLOTHES" -> CLOTHES
+                    "WEAPONS" -> WEAPONS
+                    else -> UNKNOWN
+                }
             }
+        }
+    }
 
+    val type: Type
+    val obj: Parameter
+    val objs: MutableList<Parameter>
+
+    init {
+        val para = line.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        type = Type.of(para[0])
+        obj = find(para[1])!!
+        val objs: MutableList<Parameter> = ArrayList()
+        for (strObj in para[2].split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
+            val otherObj = find(strObj)
+            if (otherObj != null) objs.add(otherObj)
+        }
+        this.objs = objs
+        val hash = HashSet(obj.allColor)
+        hash.add(Color.ORANGE)
+        obj.allColor = hash
+        recyclers.add(this)
+    }
+
+    private val isUseFull: Boolean
+        get() = obj.actualColor == Color.ORANGE && objs.any { parameter -> parameter.isMissing }
+
+    companion object {
+        var recyclers: MutableList<Recycler> = ArrayList()
+        @Throws(IOException::class)
+        fun init() {
+            val file = File("Recycler.txt")
+            if (!file.exists()) {
+                if (!file.createNewFile()) System.err.println("Can't create new file 'Recycler.java'")
+                return
+            }
+            for (line in Files.readAllLines(file.toPath())) {
+                try {
+                    Recycler(line)
+                } catch (ignored: Exception) {
+                }
+            }
         }
 
-    }
-
-    static public boolean filter(Parameter parameter) {
-        var recycler = recyclers.stream().filter(recycler1 -> recycler1.obj.equals(parameter)).findFirst();
-        return recycler.map(Recycler::isUseFull).orElse(false);
-    }
-
-
-    private boolean isUseFull() {
-        return obj.getActualColor().equals(ORANGE) && Arrays.stream(objs).anyMatch(Parameter::isMissing);
+        fun filter(parameter: Parameter?): Boolean {
+            val recycler = recyclers.stream().filter { recycler1: Recycler -> recycler1.obj.equals(parameter) }
+                .findFirst()
+            return recycler.map { obj: Recycler -> obj.isUseFull }.orElse(false)
+        }
     }
 }

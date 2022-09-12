@@ -3,15 +3,13 @@ package fr.alexandreguiny.lastdayonearth.item
 import fr.alexandreguiny.lastdayonearth.variable.Color
 import java.awt.Component
 import java.awt.Graphics
-import java.awt.event.ActionEvent
-import java.util.SortedSet
-import java.util.TreeSet
-import java.util.function.Consumer
+import java.util.*
 import javax.swing.*
 
-class Stat(val parameter: Parameter) : JPanel(), Comparable<Stat> {
+class Stat private constructor(val parameter: Parameter) : JPanel(), Comparable<Stat> {
+
     private class ColorComboRenderer : JPanel(), ListCellRenderer<Color> {
-        protected var m_c = Color.BLACK
+        private var m_c = Color.BLACK
         override fun getListCellRendererComponent(
             list: JList<out Color>?,
             color: Color,
@@ -28,22 +26,8 @@ class Stat(val parameter: Parameter) : JPanel(), Comparable<Stat> {
             super.paint(g)
         }
     }
-    private val comboBox = JComboBox<Color>()
+    private val comboBox: JComboBox<Color> = JComboBox<Color>()
 
-
-    init {
-        this.layout = BoxLayout(this, BoxLayout.Y_AXIS)
-        this.add(parameter.iconLabel)
-        run {
-            parameter.allColor.forEach(Consumer { item: Color -> comboBox.addItem(item) })
-            comboBox.renderer = ColorComboRenderer()
-            comboBox.addActionListener { e: ActionEvent? -> this.setColor(comboBox.selectedItem as Color) }
-            this.add(comboBox)
-            setColor(parameter.actualColor)
-        }
-
-        stats.add(this)
-    }
 
     private fun setColor(color: Color?) {
         if (color == null) return
@@ -54,10 +38,30 @@ class Stat(val parameter: Parameter) : JPanel(), Comparable<Stat> {
 
     companion object {
         val stats : SortedSet<Stat> = TreeSet()
+            get() {
+
+                if (field.isEmpty())
+                    for (parameter in Parameter.parameters)
+                        field.add(Stat(parameter))
+
+                return field
+            }
     }
 
     override fun compareTo(other: Stat): Int {
         return parameter.compareTo(other.parameter)
+    }
+
+    init {
+        this.layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        this.add(parameter.iconLabel)
+        run {
+            parameter.allColor.forEach { item: Color -> comboBox.addItem(item) }
+            comboBox.renderer = ColorComboRenderer()
+            comboBox.addActionListener { this.setColor(comboBox.selectedItem as Color) }
+            this.add(comboBox)
+            setColor(parameter.actualColor)
+        }
     }
 
 
