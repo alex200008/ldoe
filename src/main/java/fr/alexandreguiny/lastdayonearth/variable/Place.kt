@@ -1,4 +1,3 @@
-package fr.alexandreguiny.lastdayonearth.variable;
+package fr.alexandreguiny.lastdayonearth.variable
 
-public enum Place {
-}
+enum class Place 

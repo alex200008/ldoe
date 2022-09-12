@@ -1,8 +1,8 @@
-package fr.alexandreguiny.lastdayonearth.variable;
+package fr.alexandreguiny.lastdayonearth.variable
 
-import static fr.alexandreguiny.lastdayonearth.variable.Color.*;
+import fr.alexandreguiny.lastdayonearth.variable.Color.*
 
-public enum Category {
+enum class Category(vararg colors: Color) {
     TOOLS(GREEN, YELLOW, RED),
     CONSUMABLE(GREEN, YELLOW, RED),
     ARMOR(GREEN, YELLOW, RED),
@@ -10,25 +10,23 @@ public enum Category {
     GARAGE(GREEN, YELLOW, RED),
     OTHER(RED);
 
-    private final Color[] colors;
+    val colors: Array<out Color>
 
-    Category(Color... colors) {
-        this.colors = colors;
+    init {
+        this.colors = colors
     }
 
-    public Color[] getColors() {
-        return colors;
-    }
-
-    static public Category of(String category) {
-        // TODO generic
-        return switch (category) {
-            case "TOOLS" -> TOOLS;
-            case "CONSUMABLE" -> CONSUMABLE;
-            case "ARMOR" -> ARMOR;
-            case "MATERIALS" -> MATERIALS;
-            case "GARAGE" -> GARAGE;
-            default -> OTHER;
-        };
+    companion object {
+        fun of(category: String): Category {
+            // TODO generic
+            return when (category) {
+                "TOOLS" -> TOOLS
+                "CONSUMABLE" -> CONSUMABLE
+                "ARMOR" -> ARMOR
+                "MATERIALS" -> MATERIALS
+                "GARAGE" -> GARAGE
+                else -> OTHER
+            }
+        }
     }
 }
