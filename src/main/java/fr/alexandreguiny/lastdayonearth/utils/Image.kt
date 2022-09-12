@@ -1,48 +1,53 @@
-package fr.alexandreguiny.lastdayonearth.utils;
+package fr.alexandreguiny.lastdayonearth.utils
 
-import javax.swing.*;
-import java.io.File;
-import java.net.MalformedURLException;
-import java.util.HashMap;
+import java.io.File
+import java.net.MalformedURLException
+import javax.swing.ImageIcon
+import javax.swing.JLabel
 
-public class Image extends JLabel {
-    public static final HashMap<String, JLabel> images = new HashMap<>();
-    private String name;
+class Image(file: File) : JLabel() {
+    private val imageName: String
 
-    public Image(File file) {
+    init {
+        if (!file.name.matches("[A-Z0-9][A-Za-z'0-9-]*(_[A-Z0-9][A-Za-z'0-9-]*)*\\.png".toRegex())) {
+            Error("Bad format:'" + file.name + "'")
+        }
+        this.imageName = file.name.replace(".png", "")
         try {
-            var imageIcon = new ImageIcon(file.toURI().toURL());
-            this.name = file.getName().replace(".png", "");
-            imageIcon.setImage(imageIcon.getImage().getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH));
-            this.setIcon(imageIcon);
-            var textFrame = new TextFrame(name);
-            this.addMouseListener(textFrame);
-            this.addMouseMotionListener(textFrame);
-            images.put(this.name, this);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+            val imageIcon = ImageIcon(file.toURI().toURL())
+            imageIcon.image = imageIcon.image.getScaledInstance(100, 100, java.awt.Image.SCALE_SMOOTH)
+            this.icon = imageIcon
+            val textFrame = TextFrame(imageName)
+            addMouseListener(textFrame)
+            addMouseMotionListener(textFrame)
+            imageLabels[this.imageName] = this
+            images[imageName] = imageIcon
+        } catch (e: MalformedURLException) {
+            e.printStackTrace()
         }
     }
 
-    public static void init() {
-        init(new File("Images"));
-    }
+    companion object {
+        val imageLabels = HashMap<String, JLabel>()
+        val images = HashMap<String, ImageIcon>()
+        fun init() {
+            init(File("Images"))
+        }
 
-    private static void init(File file) {
-        if (file.isFile()) {
-            new Image(file);
-        } else if (file.isDirectory()) {
-            //noinspection ConstantConditions
-            for (var child : file.listFiles()) {
-                init(child);
+        private fun init(file: File) {
+            if (file.isFile) {
+                Image(file)
+            } else if (file.isDirectory) {
+                for (child in file.listFiles()!!) {
+                    init(child)
+                }
             }
         }
-    }
 
-    public static JLabel get(String name) {
-        var label = images.get(name);
-        if (label != null)
-            images.remove(name);
-        return label;
+        operator fun get(name: String): JLabel {
+            val label = imageLabels[name] ?: throw RuntimeException("Failed to find $name")
+            imageLabels.remove(name)
+            return label
+        }
     }
 }

@@ -1,21 +1,24 @@
 package fr.alexandreguiny.lastdayonearth;
 
-import fr.alexandreguiny.lastdayonearth.minipanel.MiniPanel;
+import fr.alexandreguiny.lastdayonearth.item.Parameter;
+import fr.alexandreguiny.lastdayonearth.item.Stat;
 import fr.alexandreguiny.lastdayonearth.variable.Category;
+import kotlin.jvm.functions.Function1;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 // TODO add scroll
-public abstract class  MyPanel <PANEL extends MiniPanel> extends JPanel {
-    private JTabbedPane categories = new JTabbedPane();
-    private ArrayList<Parameter> parameterList = new ArrayList<>();
-    private JPanel all = new JPanel();
-    private Supplier<PANEL> constructor;
+public abstract class  MyPanel extends JPanel {
+    private final JTabbedPane categories = new JTabbedPane();
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    private final ArrayList<Parameter> parameterList = new ArrayList<>();
+    private final JPanel all = new JPanel();
+    private final Function1<? super Parameter, Stat> constructor;
 
-    public MyPanel(Supplier<PANEL> constructor) {
+    public MyPanel(@NotNull Function1<? super Parameter, Stat> constructor) {
         this.constructor = constructor;
         this.setLayout(new BorderLayout());
         this.add(categories, BorderLayout.CENTER);
@@ -43,22 +46,21 @@ public abstract class  MyPanel <PANEL extends MiniPanel> extends JPanel {
     public void subUpdate() {
         var panel = (JPanel) categories.getSelectedComponent();
         var title = categories.getTitleAt(categories.getSelectedIndex());
+        panel.removeAll();
         if (title.equals("All")) {
-            panel.removeAll();
-            for(var parameter : parameterList) {
-                panel.add(map(parameter));
+            for(var stat : Stat.Companion.getStats()) {
+                panel.add(stat);
             }
         } else {
-            panel.removeAll();
-            for(var parameter : parameterList) {
-                if (parameter.getCategory().equals(Category.of(title)))
-                    panel.add(map(parameter));
+            for(var stat : Stat.Companion.getStats()) {
+                if (stat.getParameter().getCategory().equals(Category.of(title)))
+                    panel.add(stat);
             }
         }
     }
 
-    protected MiniPanel map(Parameter parameter) {
-        return constructor.get().init(parameter);
+    protected Stat map(Parameter parameter) {
+        return constructor.invoke(parameter);
     }
 
     protected abstract boolean filter(Parameter item);

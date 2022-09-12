@@ -1,73 +1,59 @@
-package fr.alexandreguiny.lastdayonearth.utils;
+package fr.alexandreguiny.lastdayonearth.utils
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import fr.alexandreguiny.lastdayonearth.item.Parameter
+import fr.alexandreguiny.lastdayonearth.item.ModifyDialog
+import java.awt.MouseInfo
+import java.awt.event.MouseEvent
+import java.awt.event.MouseListener
+import java.awt.event.MouseMotionListener
+import javax.swing.JFrame
+import javax.swing.JTextArea
 
-public class TextFrame implements MouseListener, MouseMotionListener {
-    private final String name;
-    private JFrame frame;
+class TextFrame(private val name: String) : MouseListener, MouseMotionListener {
 
-    public TextFrame(String name) {
-        this.name = name;
+    var parameter : Parameter? = null
+
+    constructor(parameter: Parameter) : this(parameter.name) {
+        this.parameter = parameter
     }
 
-    private JFrame textFrame() {
-        var frame = new JFrame();
-        frame.setResizable(false);
-        var text = new JTextArea(name);
-        text.setEditable(false);
-
-        //text.addMouseListener(this);
-        //text.addMouseMotionListener(this);
-
-        frame.add(text);
-        frame.setSize(text.getPreferredSize());
-        frame.setEnabled(false);
+    private var frame: JFrame? = null
+    private fun textFrame(): JFrame {
+        val frame = JFrame()
+        frame.isResizable = false
+        val text = JTextArea(name)
+        text.isEditable = false
+        frame.add(text)
+        frame.size = text.preferredSize
+        frame.isEnabled = false
         //frame.setSize(100, 100);
-        frame.setUndecorated(true);
-        frame.setFocusable(false);
-        frame.setAutoRequestFocus(false);
-        frame.setVisible(true);
-        return frame;
+        frame.isUndecorated = true
+        frame.isFocusable = false
+        frame.isAutoRequestFocus = false
+        frame.isVisible = true
+        return frame
     }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
-
+    override fun mouseClicked(e: MouseEvent) {
+        parameter?.let { ModifyDialog(it) }
     }
 
-    @Override
-    public void mousePressed(MouseEvent e) {
 
+    override fun mousePressed(e: MouseEvent) {}
+    override fun mouseReleased(e: MouseEvent) {}
+    override fun mouseEntered(e: MouseEvent) {
+        frame = textFrame()
+        val point = MouseInfo.getPointerInfo().location
+        frame!!.setLocation(point.x + 10, point.y + 10)
     }
 
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
+    override fun mouseExited(e: MouseEvent) {
+        frame!!.dispose()
     }
 
-    @Override
-    public void mouseEntered(MouseEvent e) {
-        frame = textFrame();
-        var point = MouseInfo.getPointerInfo().getLocation();
-        frame.setLocation(point.x + 10, point.y + 10);
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-        frame.dispose();
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
-        var point = MouseInfo.getPointerInfo().getLocation();
-        frame.setLocation(point.x + 10, point.y + 10);
+    override fun mouseDragged(e: MouseEvent) {}
+    override fun mouseMoved(e: MouseEvent) {
+        val point = MouseInfo.getPointerInfo().location
+        frame!!.setLocation(point.x + 10, point.y + 10)
     }
 }

@@ -1,162 +1,154 @@
-package fr.alexandreguiny.lastdayonearth;
+package fr.alexandreguiny.lastdayonearth.item
 
-import fr.alexandreguiny.lastdayonearth.utils.Image;
-import fr.alexandreguiny.lastdayonearth.variable.Category;
-import fr.alexandreguiny.lastdayonearth.variable.Color;
+import fr.alexandreguiny.lastdayonearth.utils.Error
+import fr.alexandreguiny.lastdayonearth.utils.Image
+import fr.alexandreguiny.lastdayonearth.utils.ObjectLabel
+import fr.alexandreguiny.lastdayonearth.variable.Category
+import fr.alexandreguiny.lastdayonearth.variable.Color
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import javax.swing.ImageIcon
+import javax.swing.JLabel
 
-import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+class Parameter: Comparable<Parameter> {
+    val name: String
+    var iconLabel: JLabel
 
-import static fr.alexandreguiny.lastdayonearth.variable.Category.OTHER;
-import static fr.alexandreguiny.lastdayonearth.variable.Color.*;
-
-public class Parameter {
-    public final String name;
-    private Color actualColor = Color.GRAY;
-    private Set<Color> allColor = Set.of(RED, Color.GREEN);
-    private boolean natural = false;
-    private Category category = OTHER;
-    private final JLabel icon;
-    public static ArrayList<Parameter> parameters = new ArrayList<>();
-
-    public Parameter(String name, JLabel icon) {
-        this.name = name.replace(".png", "");
-        this.icon = icon;
-        parameters.add(this);
-    }
-
-    public static void init() {
-        var str = "";
-        try {
-            var save = new File("Save.txt");
-            if (!save.exists() && !save.createNewFile())
-                throw new RuntimeException("Failed to create 'Save.txt'");
-            str = Files.readString(Path.of("Save.txt"));
-        } catch (IOException e) {
-            e.printStackTrace();
+    var actualColor = Color.GRAY
+        set(value) {
+            field = value
+            save()
+        }
+    var allColor = java.util.Set.of(Color.RED, Color.GREEN)
+        set(value) {
+            field = value
+            save()
+        }
+    var isNatural = false
+        set(value) {
+            field = value
+            save()
+        }
+    var category = Category.OTHER
+        set(value) {
+            field = value
+            allColor = java.util.Set.of(*category.colors)
+            save()
         }
 
-        for (var line : str.split("\r\n")) {
-            new Parameter(line);
+    constructor(name: String, iconLabel: ImageIcon) {
+        this.name = name.replace(".png", "")
+        this.iconLabel = ObjectLabel(this, iconLabel)
+        parameters.add(this)
+    }
 
+    constructor(line: String) {
+        val para = line.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+
+        if (para.size < 1) throw RuntimeException("Invalid argument :$line")
+
+        name = para[0].replace(".png", "")
+        if (para.size > 1) actualColor = Color.of(para[1])
+        if (para.size > 2) // TODO delete me
+            allColor = HashSet(
+                Color.listOf(
+                    para[2].split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                )
+            )
+        if (para.size > 3) isNatural = para[3] == "T"
+        if (para.size > 4) {
+            category = Category.of(para[4])
+            allColor = setOf(*category.colors)
         }
-        Image.images.forEach(Parameter::new);
+
+        iconLabel = ObjectLabel(this)
+        parameters.add(this)
     }
 
-    public Parameter(String line) {
-        var para = line.split(",");
-        if (para.length < 1)
-            throw new RuntimeException("Invalid argument :" + line);
-
-        this.name = para[0].replace(".png", "");
-        this.icon = Image.get(this.name);
-        if (this.icon == null)
-            throw new RuntimeException("Failed to find " + this.name);
-        if (para.length > 1)
-            this.actualColor = Color.of(para[1]);
-        if (para.length > 2) // TODO delete me
-            this.allColor = new HashSet<>(Color.listOf(para[2].split("\\.")));
-        if (para.length > 3)
-            natural = para[3].equals("T");
-        if (para.length > 4) {
-            category = Category.of(para[4]);
-            allColor = Set.of(category.getColors());
-        }
-        parameters.add(this);
+    override fun toString(): String {
+        return """
+            $name,$actualColor,${
+            allColor.stream().map { obj: Color -> obj.toString() }.reduce { s: String, s2: String -> "$s.$s2" }
+                .orElse("")
+        },${if (isNatural) "T" else "F"},${category.name}
+            
+            """.trimIndent()
     }
 
-    public static Parameter find(String name) {
-        var res =  parameters.stream().filter(parameter -> parameter.name.equals(name)).findFirst();
-        if (res.isEmpty())
-            System.err.println(name);
-        return res.orElse(null);
-    }
-
-    @Override
-    public String toString() {
-        return name + ',' +
-                actualColor + "," +
-                allColor.stream().map(Enum::toString).reduce((s, s2) -> s + "." + s2).orElse("") + "," +
-                ((natural) ? "T" : "F") + "," +
-                category.name() +
-                "\r\n";
-    }
-
-    public Color getActualColor() {
-        return actualColor;
-    }
-
-    public void setActualColor(Color actualColor) {
-        this.actualColor = actualColor;
-        save();
-    }
-
-    public Set<Color> getAllColor() {
-        return allColor;
-    }
-
-    public void setAllColor(Set<Color> allColor) {
-        this.allColor = allColor;
-        save();
-    }
-
-    public boolean isNatural() {
-        return natural;
-    }
-
-    public void setNatural(boolean natural) {
-        this.natural = natural;
-        save();
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-        this.allColor = Set.of(category.getColors());
-        save();
-    }
-
-    public JLabel getIcon() {
-        return icon;
-    }
-
-    private void save() {
-        var file = new File("Save.txt");
+    private fun save() {
+        val file = File("Save.txt")
         if (!file.exists()) {
             try {
-                if (file.createNewFile())
-                    throw new RuntimeException("Cannot Save");
-            } catch (Exception e) {
-                e.printStackTrace();
-                return;
+                if (file.createNewFile()) throw RuntimeException("Cannot Save")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return
             }
         }
         try {
-            Files.writeString(file.toPath(), parameters.stream().map(Parameter::toString).reduce(String::concat).orElse(""));
-        } catch (IOException e) {
-            e.printStackTrace();
+            Files.writeString(file.toPath(), parameters.stream().map { obj: Parameter? -> obj.toString() }
+                .reduce { obj: String, str: String -> obj + str }.orElse(""))
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
     }
 
-
-    public boolean isMissing() {
-        return actualColor.equals(RED) || actualColor.equals(YELLOW);
+    override fun compareTo(other: Parameter): Int {
+        return name.lowercase().compareTo(other.name.lowercase())
     }
 
-    public boolean isEmpty() {
-        return actualColor.equals(RED);
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Parameter
+
+        if (name != other.name) return false
+
+        return true
     }
 
+    override fun hashCode(): Int {
+        return name.hashCode()
+    }
 
+    val isMissing: Boolean
+        get() = actualColor == Color.RED || actualColor == Color.YELLOW
+    val isEmpty: Boolean
+        get() = actualColor == Color.RED
+
+    companion object {
+        @JvmField
+        var parameters = HashSet<Parameter?>()
+        val allLines = HashMap<String, String>()
+        @JvmStatic
+        fun init() {
+            var str = ""
+            try {
+                val save = File("Save.txt")
+                if (!save.exists() && !save.createNewFile()) throw RuntimeException("Failed to create 'Save.txt'")
+                str = Files.readString(Path.of("Save.txt"))
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            for (line in str.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
+                Parameter(line)
+                val name = line.split(",")[0]
+                allLines[name] = line
+            }
+            Image.images.forEach { (name: String, iconImage : ImageIcon) -> Parameter(name, iconImage) }
+        }
+
+        @JvmStatic
+        fun find(name: String): Parameter? {
+            val res = parameters.stream().filter { parameter: Parameter? -> parameter!!.name == name }
+                .findFirst()
+            if (res.isEmpty) Error("Can't find :'$name'")
+            return res.orElse(null)
+        }
+    }
 
 
 }

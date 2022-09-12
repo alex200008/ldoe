@@ -1,85 +1,69 @@
-package fr.alexandreguiny.lastdayonearth;
+package fr.alexandreguiny.lastdayonearth
 
-import fr.alexandreguiny.lastdayonearth.minipanel.Modif;
-import fr.alexandreguiny.lastdayonearth.minipanel.Stat;
-import fr.alexandreguiny.lastdayonearth.utils.Image;
-
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import java.awt.*;
-import java.io.IOException;
+import fr.alexandreguiny.lastdayonearth.Craft.Companion.canCraft
+import fr.alexandreguiny.lastdayonearth.item.Parameter
+import fr.alexandreguiny.lastdayonearth.item.Stat
+import fr.alexandreguiny.lastdayonearth.utils.Image
+import java.awt.Toolkit
+import java.io.IOException
+import javax.swing.JFrame
+import javax.swing.JTabbedPane
+import javax.swing.event.ChangeEvent
 
 // TODO -optimiser la sauvegarde
-// TODO -metre un ordre de rangement
 // TODO add Timer
-
-
-public class Frame extends JFrame {
-    private final MyPanel<Stat> craftItems = new MyPanel<>(Stat::new) {
-        @Override
-        protected boolean filter(Parameter parameter) {
-            return Craft.canCraft(parameter);
+class Frame(title: String?) : JFrame(title) {
+    private val craftItems: MyPanel = object : MyPanel({parameter: Parameter -> Stat(parameter) }) {
+        override fun filter(parameter: Parameter): Boolean {
+            return canCraft(parameter)
         }
-    };
-    private final MyPanel<Stat> allItems = new MyPanel<>(Stat::new) {
-        @Override
-        protected boolean filter(Parameter parameter) {
-            return true;
+    }
+    private val allItems: MyPanel = object : MyPanel({parameter: Parameter -> Stat(parameter) }) {
+        override fun filter(parameter: Parameter): Boolean {
+            return true
         }
-    };
-    private final MyPanel<Stat> missCraft = new MyPanel<>(Stat::new) {
-        @Override
-        protected boolean filter(Parameter parameter) {
-            return parameter.isNatural() && parameter.isMissing();
+    }
+    private val missCraft: MyPanel = object : MyPanel({parameter: Parameter -> Stat(parameter) }) {
+        override fun filter(parameter: Parameter): Boolean {
+            return parameter.isNatural && parameter.isMissing
         }
-    };
-    private final MyPanel<Modif> modif = new MyPanel<>(Modif::new) {
-        @Override
-        protected boolean filter(Parameter parameter) {
-            return true;
+    }
+    private val recycler: MyPanel = object : MyPanel({parameter: Parameter -> Stat(parameter) }) {
+        override fun filter(item: Parameter): Boolean {
+            return Recycler.filter(item)
         }
-    };
-    private final MyPanel<Stat> recycler = new MyPanel<Stat>(Stat::new) {
-        @Override
-        protected boolean filter(Parameter item) {
-            return Recycler.filter(item);
-        }
-    };
-
-    public Frame(String title) throws HeadlessException, IOException {
-        super(title);
-        Image.init();
-        Parameter.init();
-        Craft.init();
-        Recycler.init();
-
-
-        var menus = new JTabbedPane();
-        menus.add("All", allItems);
-        menus.add("Craft", craftItems);
-        menus.add("Missing", missCraft);
-        menus.add("Recycler", recycler);
-        menus.add("Modif", modif);
-        menus.addChangeListener(this::menu);
-        this.add(menus);
-
-        allItems.update();
-
-        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-        this.setSize(dimension.width * 3 / 4, dimension.height * 3 / 4);
-        this.setVisible(true);
-
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
-    public static void main(String[] args) throws IOException {
-        new Frame("Last Day On Earth");
+    init {
+        Image.init()
+        Parameter.init()
+        Craft.init()
+        Recycler.init()
+        val menus = JTabbedPane()
+        menus.add("All", allItems)
+        menus.add("Craft", craftItems)
+        menus.add("Missing", missCraft)
+        menus.add("Recycler", recycler)
+        menus.addChangeListener { e: ChangeEvent -> menu(e) }
+        this.add(menus)
+        allItems.update()
+        val dimension = Toolkit.getDefaultToolkit().screenSize
+        this.setSize(dimension.width * 3 / 4, dimension.height * 3 / 4)
+        this.isVisible = true
+        defaultCloseOperation = EXIT_ON_CLOSE
     }
 
-    public void menu(ChangeEvent e) {
-        JTabbedPane obj = (JTabbedPane) e.getSource();
-        MyPanel<?> myPanel = (MyPanel<?>) obj.getSelectedComponent();
-        myPanel.update();
+    fun menu(e: ChangeEvent) {
+        val obj = e.source as JTabbedPane
+        val myPanel = obj.selectedComponent as MyPanel
+        myPanel.update()
+    }
 
+    companion object {
+        @Throws(IOException::class)
+        @JvmStatic
+        fun main(args: Array<String>) {
+            Frame("Last Day On Earth")
+        }
     }
 }

@@ -1,65 +1,58 @@
-package fr.alexandreguiny.lastdayonearth;
+package fr.alexandreguiny.lastdayonearth
 
-import fr.alexandreguiny.lastdayonearth.variable.Color;
+import fr.alexandreguiny.lastdayonearth.item.Parameter
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+class Craft(line: String) {
+    val obj: Parameter?
+    val other: MutableList<Parameter> = ArrayList()
+    private var valid = true
 
-public class Craft {
-    public static List<Craft> crafts = new ArrayList<>();
-
-    public static void init() {
-        var str = "";
-        try {
-            var craft = new File("Craft.txt");
-            if (!craft.exists() && !craft.createNewFile())
-                throw new RuntimeException("Failed to create file:'Craft.txt'");
-            str = Files.readString(Path.of("Craft.txt"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        for (var line : str.split("\r\n")) {
-            if (line.equals(""))
-                continue;
-            crafts.add(new Craft(line));
-        }
-    }
-
-    public final Parameter obj;
-    public final List<Parameter> other = new ArrayList<>();
-    private boolean valid = true;
-
-    public Craft(String line) {
-        Craft.crafts.add(this);
-
-        var list = line.split(",");
-        this.obj = Parameter.find(list[0]);
-
-        for (var name : list[1].split("\\.")) {
-            var item = Parameter.find(name);
-            if (item != null)
-                this.other.add(item);
-            else {
-                System.out.println(name);
-                valid = false;
+    init {
+        crafts.add(this)
+        val list = line.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        obj = Parameter.find(list[0])
+        for (name in list[1].split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
+            val item = Parameter.find(name)
+            if (item != null) other.add(item) else {
+                println(name)
+                valid = false
             }
         }
     }
 
-    public boolean canCraft() {
-        if (obj == null || !valid)
-            return false;
-        return obj.isMissing() && !other.stream().map(Parameter::isEmpty).reduce((aBoolean, aBoolean2) -> aBoolean || aBoolean2).orElse(true);
+    fun canCraft(): Boolean {
+        return if (obj == null || !valid) false else obj.isMissing && !other.stream()
+            .map { obj: Parameter -> obj.isEmpty }
+            .reduce { aBoolean: Boolean, aBoolean2: Boolean -> aBoolean || aBoolean2 }.orElse(true)
     }
 
-    public static boolean canCraft(Parameter parameter) {
-        return Craft.crafts.stream()
-                .filter(craft -> craft.obj.equals(parameter))
-                .anyMatch(Craft::canCraft);
+    companion object {
+        var crafts: MutableList<Craft> = ArrayList()
+        @JvmStatic
+        fun init() {
+            var str = ""
+            try {
+                val craft = File("Craft.txt")
+                if (!craft.exists() && !craft.createNewFile()) throw RuntimeException("Failed to create file:'Craft.txt'")
+                str = Files.readString(Path.of("Craft.txt"))
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            for (line in str.split("\r\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
+                if (line == "") continue
+                crafts.add(Craft(line))
+            }
+        }
+
+        @JvmStatic
+        fun canCraft(parameter: Parameter): Boolean {
+            return crafts.stream()
+                .filter { craft: Craft -> craft.obj == parameter }
+                .anyMatch { obj: Craft -> obj.canCraft() }
+        }
     }
 }

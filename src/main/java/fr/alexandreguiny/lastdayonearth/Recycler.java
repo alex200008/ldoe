@@ -1,6 +1,6 @@
 package fr.alexandreguiny.lastdayonearth;
 
-import fr.alexandreguiny.lastdayonearth.variable.Color;
+import fr.alexandreguiny.lastdayonearth.item.Parameter;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,11 +13,13 @@ public class Recycler {
     // FIXME unfinished
     enum Type {
         CLOTHES,
+        WEAPONS,
         UNKNOWN;
 
         static public Type of(String name) {
             return switch (name) {
                 case "CLOTHES" -> CLOTHES;
+                case "WEAPONS" -> WEAPONS;
                 default -> UNKNOWN;
             };
         }
@@ -41,7 +43,7 @@ public class Recycler {
 
         this.objs = objs.toArray(Parameter[]::new);
 
-        var hash = new HashSet<>(obj.getAllColor());
+        var hash = new HashSet<>(Objects.requireNonNull(obj).getAllColor());
         hash.add(ORANGE);
         obj.setAllColor(hash);
         recyclers.add(this);
@@ -51,12 +53,18 @@ public class Recycler {
         var file = new File("Recycler.txt");
 
         if (!file.exists()) {
-            file.createNewFile();
+            if (!file.createNewFile())
+                System.err.println("Can't create new file 'Recycler.java'");
             return;
         }
 
         for (var line : Files.readAllLines(file.toPath())) {
-            new Recycler(line);
+            try {
+                new Recycler(line);
+            } catch (Exception ignored) {
+
+            }
+
         }
 
     }
